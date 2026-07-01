@@ -3,24 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Counter App</title>
+    <title>Quantum Counter Pro — The Ultimate Productivity Dashboard</title>
+    <meta name="description" content="Experience Quantum Counter Pro: a futuristic, glassmorphic counter utility with integrated physics-based particles, sound synthesis, session metrics, bounds enforcement, auto-clicker automation, and local storage state persistence.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="theme-neutral">
 
-<div class="container">
-    <h1>Counter App</h1>
+    <!-- Interactive Background Canvas -->
+    <canvas id="particle-canvas"></canvas>
 
-    <div id="counter">0</div>
+    <!-- Main Application Wrapper -->
+    <div class="app-wrapper">
+        <header class="app-header">
+            <div class="brand">
+                <span class="logo-icon">⚡</span>
+                <div class="logo-text">
+                    <h1>Rakesh's Counter App <span class="badge">PRO</span></h1>
+                    <p class="subtitle">Next-gen analytical counter platform</p>
+                </div>
+            </div>
+            
+            <div class="global-actions">
+                <button id="sound-toggle" class="btn-icon" aria-label="Toggle Sound Effects" title="Toggle Sound Synth (Web Audio)">
+                    <span class="icon" id="sound-icon">🔊</span>
+                    <span class="btn-text" id="sound-text">Audio On</span>
+                </button>
+                <button id="theme-toggle" class="btn-icon" aria-label="Toggle Visual Mode" title="Toggle Glass/Opaque Style">
+                    <span class="icon">🌓</span>
+                    <span class="btn-text">Neon Glow</span>
+                </button>
+            </div>
+        </header>
 
-    <div class="buttons">
-        <button id="decrease">-</button>
-        <button id="reset">Reset</button>
-        <button id="increase">+</button>
+        <main class="dashboard-grid">
+            
+            <!-- Left Side: Main Counter, Controls, and Automation -->
+            <section class="panel main-counter-panel">
+                <!-- Counter Status / State Indicator -->
+                <div class="status-indicator">
+                    <span id="active-counter-name">Primary Counter</span>
+                    <span class="pulse-dot"></span>
+                </div>
+
+                <!-- Main Counter Box -->
+                <div class="counter-card" id="counter-card">
+                    <div class="card-bg-glow"></div>
+                    <div class="counter-display-wrapper">
+                        <div id="counter">0</div>
+                    </div>
+                    
+                    <!-- Min/Max Bounds Visual Bar -->
+                    <div class="bounds-progress-bar">
+                        <div id="bounds-indicator" class="bounds-indicator"></div>
+                    </div>
+                </div>
+
+                <!-- Primary Control Buttons -->
+                <div class="action-controls">
+                    <button id="decrease" class="btn btn-action btn-decrease" aria-label="Decrease Counter">
+                        <span class="action-symbol">−</span>
+                        <span class="action-label" id="dec-label">-1</span>
+                    </button>
+                    
+                    <button id="reset" class="btn btn-action btn-reset" aria-label="Reset Counter">
+                        <span class="action-symbol">⟲</span>
+                        <span class="action-label">Reset</span>
+                    </button>
+                    
+                    <button id="increase" class="btn btn-action btn-increase" aria-label="Increase Counter">
+                        <span class="action-symbol">+</span>
+                        <span class="action-label" id="inc-label">+1</span>
+                    </button>
+                </div>
+
+                <!-- Fast Modification Presets -->
+                <div class="preset-controls">
+                    <button data-preset="-10" class="btn btn-preset">-10</button>
+                    <button data-preset="-5" class="btn btn-preset">-5</button>
+                    <button data-preset="5" class="btn btn-preset">+5</button>
+                    <button data-preset="10" class="btn btn-preset">+10</button>
+                </div>
+
+                <!-- Advanced Configuration & Automation -->
+                <div class="accordion-section expanded">
+                    <h3 class="accordion-trigger">
+                        <span>🎛️ Settings &amp; Automation</span>
+                    </h3>
+                    
+                    <div class="accordion-content">
+                        <!-- Step Size Config -->
+                        <div class="config-row">
+                            <div class="config-info">
+                                <label for="step-input">Step Size</label>
+                                <span class="config-desc">Value added/subtracted per click</span>
+                            </div>
+                            <div class="config-control">
+                                <input type="range" id="step-slider" min="1" max="100" value="1">
+                                <input type="number" id="step-input" min="1" max="10000" value="1" class="input-modern">
+                            </div>
+                        </div>
+
+                        <!-- Limit Boundaries Config -->
+                        <div class="config-row">
+                            <div class="config-info">
+                                <span>Limit Boundaries</span>
+                                <span class="config-desc">Restrict counter range</span>
+                            </div>
+                            <div class="config-control bounds-inputs">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="min-bounds-toggle">
+                                    <span class="checkmark"></span>
+                                    Min:
+                                </label>
+                                <input type="number" id="min-bounds-val" value="-50" disabled class="input-modern width-sm">
+
+                                <label class="checkbox-container margin-left-md">
+                                    <input type="checkbox" id="max-bounds-toggle">
+                                    <span class="checkmark"></span>
+                                    Max:
+                                </label>
+                                <input type="number" id="max-bounds-val" value="100" disabled class="input-modern width-sm">
+                            </div>
+                        </div>
+
+                        <!-- Auto Clicker Config -->
+                        <div class="config-row">
+                            <div class="config-info">
+                                <span>Autoclick Automation</span>
+                                <span class="config-desc">Auto triggers counter updates</span>
+                            </div>
+                            <div class="config-control autoclicker-controls">
+                                <select id="autoclicker-direction" class="select-modern">
+                                    <option value="increase">Increment (+)</option>
+                                    <option value="decrease">Decrement (-)</option>
+                                </select>
+                                <div class="speed-slider-wrapper">
+                                    <input type="range" id="autoclicker-speed" min="1" max="20" value="5" title="Ticks per second">
+                                    <span id="speed-label">5 Hz</span>
+                                </div>
+                                <button id="autoclicker-toggle" class="btn btn-primary btn-run">
+                                    <span class="play-icon">▶</span> Run
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Side: Counter Management, Stats & History Log -->
+            <section class="sidebar-grid">
+                
+                <!-- Section 1: Session Management -->
+                <div class="panel sidebar-panel manager-panel">
+                    <h2 class="section-title">📂 Counter Collection</h2>
+                    
+                    <!-- Create Counter Form -->
+                    <form id="new-counter-form" class="new-counter-form">
+                        <input type="text" id="new-counter-name" placeholder="Counter Name (e.g. Gym Sets)" required class="input-modern">
+                        <button type="submit" class="btn btn-secondary">Add</button>
+                    </form>
+
+                    <!-- Counter Items List -->
+                    <div id="counter-list" class="counter-list">
+                        <!-- Dynamic content -->
+                    </div>
+                </div>
+
+                <!-- Section 2: Real-time Analytics -->
+                <div class="panel sidebar-panel stats-panel">
+                    <h2 class="section-title">📊 Live Session Analytics</h2>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-label">Total Clicks</span>
+                            <span class="stat-value" id="stat-total-clicks">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Peak Value</span>
+                            <span class="stat-value text-emerald" id="stat-peak-max">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Lowest Value</span>
+                            <span class="stat-value text-crimson" id="stat-peak-min">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Click Rate</span>
+                            <span class="stat-value" id="stat-click-speed">0.0 cps</span>
+                        </div>
+                    </div>
+
+                    <div class="timer-display">
+                        <span class="timer-label">Session Elapsed:</span>
+                        <span class="timer-value" id="session-timer">00:00:00</span>
+                    </div>
+                </div>
+
+                <!-- Section 3: History & Undo/Redo Logs -->
+                <div class="panel sidebar-panel history-panel">
+                    <div class="history-header">
+                        <h2 class="section-title">📜 Operations Log</h2>
+                        <div class="history-actions">
+                            <button id="undo-btn" class="btn btn-small" title="Undo Action" disabled>↶ Undo</button>
+                            <button id="redo-btn" class="btn btn-small" title="Redo Action" disabled>↷ Redo</button>
+                        </div>
+                    </div>
+
+                    <div class="log-container" id="log-container">
+                        <div class="empty-log-msg">No actions logged yet. Start clicking!</div>
+                    </div>
+
+                    <div class="log-actions">
+                        <button id="clear-log-btn" class="btn btn-text-only">Clear Log</button>
+                        <button id="export-data-btn" class="btn btn-text-only">Export JSON</button>
+                    </div>
+                </div>
+                
+            </section>
+        </main>
+        
+        <footer class="app-footer">
+            <p>
+                Counter App &copy; 2023. All rights reserved. |
+        <a href="https://www.linkedin.com/in/therakeshhr/"
+        target="_blank"
+        style="color:#0A66C2; text-decoration:none; font-weight:600;">
+            LinkedIn
+        </a>
+</p>
+        </footer>
     </div>
-</div>
 
-<script src="app.js"></script>
-
+    <!-- Script imports -->
+    <script src="app.js"></script>
 </body>
 </html>
